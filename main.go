@@ -63,6 +63,20 @@ func loginToDiary(diary *Diaries) {
 }
 
 func diaryMenu(diary *Diary) {
+
+	if diary.IsLocked {
+		fmt.Println("This diary is currently locked.")
+		var password string
+		fmt.Print("Enter password to unlock: ")
+		fmt.Scanln(&password)
+
+		if !diary.UnlockDiary(password) {
+			fmt.Println("Failed to unlock diary. Returning to main menu.")
+			return
+		}
+		fmt.Println("Diary unlocked successfully.")
+	}
+
 	for {
 		fmt.Println("\n--- Diary Menu ---")
 		fmt.Println("1. Add Entry")
@@ -75,6 +89,11 @@ func diaryMenu(diary *Diary) {
 		var choice int
 		fmt.Print("Choose an option: ")
 		fmt.Scanln(&choice)
+
+		if choice < 0 || choice > 5 {
+			fmt.Println("Invalid choice, please try again.")
+			continue
+		}
 
 		switch choice {
 		case 1:
@@ -96,7 +115,8 @@ func diaryMenu(diary *Diary) {
 				continue
 			}
 			for _, entry := range diary.Entries {
-				fmt.Printf("ID: %d\nTitle: %s\nBody: %s\nDate: %s\n\n", entry.ID, entry.Title, entry.Body, entry.DateCreated.Format("02 Jan 2006 15:04"))
+				fmt.Printf("ID: %d\nTitle: %s\nBody: %s\nDate: %s\n\n",
+					entry.ID, entry.Title, entry.Body, entry.DateCreated.Format("02 Jan 2006 15:04"))
 			}
 
 		case 3:
@@ -108,13 +128,13 @@ func diaryMenu(diary *Diary) {
 			fmt.Scanln(&title)
 			fmt.Print("New Body: ")
 			fmt.Scanln(&body)
-			diary.UpdateDiary(id, title, body)
+			diary.UpdateEntry(id, title, body)
 
 		case 4:
 			var id int
 			fmt.Print("Entry ID to delete: ")
 			fmt.Scanln(&id)
-			diary.DeleteEntry(id)
+			diary.DeleteEntryById(id)
 
 		case 5:
 			diary.IsLocked = true
