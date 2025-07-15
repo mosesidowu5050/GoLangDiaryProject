@@ -1,6 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
 
 func main() {
 	diaries := Diaries{}
@@ -11,9 +17,12 @@ func main() {
 		fmt.Println("2. Login to Diary")
 		fmt.Println("0. Exit")
 
-		var choice int
-		fmt.Print("Enter choice: ")
-		fmt.Scanln(&choice)
+		userChoice := getInput("Choose an option: ")
+		choice, err := strconv.Atoi(userChoice)
+		if err != nil {
+			fmt.Println("Invalid input, please enter a number.")
+			continue
+		}
 
 		if choice < 0 || choice > 2 {
 			fmt.Println("Invalid choice, please try again.")
@@ -35,25 +44,14 @@ func main() {
 }
 
 func createDiary(diary *Diaries) {
-	fmt.Print("Enter your username: ")
-	var username string
-	fmt.Scanln(&username)
-
-	fmt.Print("Enter your password: ")
-	var password string
-	fmt.Scanln(&password)
-
+	username := getInput("Enter your username: ")
+	password := getInput("Enter your password: ")
 	diary.AddDiary(username, password)
-	fmt.Printf("Diary for %s created successfully.\n", username)
 }
 
 func loginToDiary(diary *Diaries) {
-	fmt.Print("Enter your username: ")
-	var username string
-	fmt.Scanln(&username)
-
+	username := getInput("Enter your username: ")
 	foundDiary := diary.FindDiary(username)
-
 	if foundDiary != nil {
 		fmt.Printf("Welcome back, %s!\n", username)
 		diaryMenu(foundDiary)
@@ -101,11 +99,9 @@ func diaryMenu(diary *Diary) {
 				fmt.Println("Diary is locked. Unlock to add entries.")
 				continue
 			}
-			var title, body string
-			fmt.Print("Title: ")
-			fmt.Scanln(&title)
-			fmt.Print("Body: ")
-			fmt.Scanln(&body)
+			title := getInput("Enter entry title: ")
+			body := getInput("Enter entry body: ")
+
 			diary.CreateEntry(title, body)
 			fmt.Println("Entry created.")
 
@@ -120,20 +116,25 @@ func diaryMenu(diary *Diary) {
 			}
 
 		case 3:
-			var id int
-			var title, body string
-			fmt.Print("Entry ID to update: ")
-			fmt.Scanln(&id)
-			fmt.Print("New Title: ")
-			fmt.Scanln(&title)
-			fmt.Print("New Body: ")
-			fmt.Scanln(&body)
+			userId := getInput("Enter your ID to update: ")
+			id, err := strconv.Atoi(userId)
+			if err != nil {
+				fmt.Println("Invalid ID. Please enter a valid number.")
+				continue
+			}
+
+			title := getInput("Enter entry title: ")
+			body := getInput("Enter entry body: ")
+
 			diary.UpdateEntry(id, title, body)
 
 		case 4:
-			var id int
-			fmt.Print("Entry ID to delete: ")
-			fmt.Scanln(&id)
+			userId := getInput("Enter your ID to update: ")
+			id, err := strconv.Atoi(userId)
+			if err != nil {
+				fmt.Println("Invalid ID. Please enter a valid number.")
+				continue
+			}
 			diary.DeleteEntryById(id)
 
 		case 5:
@@ -149,4 +150,11 @@ func diaryMenu(diary *Diary) {
 			fmt.Println("Invalid choice.")
 		}
 	}
+}
+
+func getInput(prompt string) string {
+	fmt.Print(prompt)
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	return strings.TrimSpace(text)
 }
