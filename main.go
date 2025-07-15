@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -31,10 +32,13 @@ func main() {
 
 		switch choice {
 		case 1:
+			simulateLoading("Loading diary setup ", 5)
 			createDiary(&diaries)
 		case 2:
+			simulateLoading("Accessing Login ", 3)
 			loginToDiary(&diaries)
 		case 0:
+			simulateLoading("Existing app ", 3)
 			fmt.Println("Goodbye!")
 			return
 		default:
@@ -64,12 +68,9 @@ func diaryMenu(diary *Diary) {
 
 	if diary.IsLocked {
 		fmt.Println("This diary is currently locked.")
-		var password string
-		fmt.Print("Enter password to unlock: ")
-		fmt.Scanln(&password)
-
+		password := getInput("Enter password to unlock: ")
 		if !diary.UnlockDiary(password) {
-			fmt.Println("Failed to unlock diary. Returning to main menu.")
+			simulateLoading("Failed to unlock diary with invalid password. Returning to main menu.", 3)
 			return
 		}
 		fmt.Println("Diary unlocked successfully.")
@@ -157,4 +158,13 @@ func getInput(prompt string) string {
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	return strings.TrimSpace(text)
+}
+
+func simulateLoading(message string, seconds int) {
+	fmt.Print(message)
+	for count := 0; count < seconds; count++ {
+		time.Sleep(500 * time.Millisecond)
+		fmt.Print(".")
+	}
+	fmt.Println()
 }
